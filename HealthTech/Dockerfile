@@ -4,16 +4,16 @@ FROM eclipse-temurin:17-jdk-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy everything to /app
+# Copy all files to /app
 COPY . .
 
-# Install Maven inside container
-RUN apk add --no-cache maven bash
+# Make Maven wrapper executable
+RUN chmod +x mvnw
 
-# Build project using Maven
-RUN mvn clean package -DskipTests
+# Build project using Maven wrapper
+RUN ./mvnw clean package -DskipTests
 
-# Expose port 8080
+# Expose port
 EXPOSE 8080
 
 # Run the jar automatically (pick any jar in target)

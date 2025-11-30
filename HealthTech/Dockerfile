@@ -2,14 +2,14 @@ FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Install Maven
-RUN apk add --no-cache maven bash
-
-# Copy project files
+# Copy all files
 COPY . .
 
-# Build using Maven (skip mvnw)
-RUN mvn clean package -DskipTests
+# Make Maven wrapper executable
+RUN chmod +x mvnw
+
+# Build using Maven wrapper
+RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
 

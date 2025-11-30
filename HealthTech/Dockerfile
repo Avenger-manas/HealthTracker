@@ -4,10 +4,13 @@ WORKDIR /app
 
 COPY . .
 
-RUN apk add --no-cache maven
+# Make Maven wrapper executable
+RUN chmod +x mvnw
 
-RUN mvn clean package -DskipTests
+# Build project using Maven wrapper
+RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "target/HealthTech-0.0.1-SNAPSHOT.jar"]
+# Run the jar (auto pick the jar)
+CMD ["java", "-jar", "target/*.jar"]

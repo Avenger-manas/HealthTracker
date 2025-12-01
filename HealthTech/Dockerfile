@@ -1,29 +1,39 @@
-# ----- Build Stage -----
-FROM eclipse-temurin:17-jdk-alpine AS build
+# ===========================
+# Stage 1: Build the JAR
+# ===========================
+FROM eclipse-temurin:17-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Install bash (needed for mvnw)
-RUN apk add --no-cache bash
+# 1️⃣ Copy Maven wrapper and pom.xml first
+COPY mvnw .
+COPY .mvn/ .mvn
+COPY pom.xml .
 
-# Copy all files
-COPY . .
-
-# Give permission
+# 2️⃣ Give executable permission to mvnw
 RUN chmod +x mvnw
 
-# Build jar
+# 3️⃣ Download dependencies (cache optimization)
+RUN ./mvnw dependency:go-offline -B
+
+# 4️⃣ Copy the rest of the project
+COPY src src
+
+# 5️⃣ Build the JAR
 RUN ./mvnw clean package -DskipTests
 
-
-# ----- Run Stage -----
+# ===========================
+# Stage 2: Run the JAR
+# ===========================
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Copy jar from build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy jar file from build stage
+COPY --from=builder /app/target/*.jar app.jar
 
+# Expose app port
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+# Run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "app.jar"]

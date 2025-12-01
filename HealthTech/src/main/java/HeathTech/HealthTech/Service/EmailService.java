@@ -1,11 +1,17 @@
 package HeathTech.HealthTech.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;  // <--- यह सही है, लेकिन यह लाइन आपके पिछले उत्तर में नहीं दिख रही थी।
+import com.sendgrid.*; // SendGrid, Request, Response, Method Classes के लिए
+import com.sendgrid.helpers.mail.Mail; // Mail Class के लिए
+import com.sendgrid.helpers.mail.objects.Content; // Content Class के लिए
+import com.sendgrid.helpers.mail.objects.Email; // Email Class के लिए
 
+import org.springframework.beans.factory.annotation.Value; // @Value एनोटेशन के लिए
+import org.springframework.stereotype.Service;
+
+import java.io.IOException; // <--- Java I/O एक्सेप्शन हैंडलिंग के लिए आवश्यक
+
+// बाकी कोड (आपकी @Service क्लास और sendMail विधि)
+// ...
 @Service
 public class EmailService {
   // 1. SendGrid API Key को Environment Variable से प्राप्त करें

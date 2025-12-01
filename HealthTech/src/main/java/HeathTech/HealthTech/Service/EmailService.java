@@ -7,18 +7,46 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    @Autowired
-    private JavaMailSender javaMailSender;
+  // 1. SendGrid API Key को Environment Variable से प्राप्त करें
+    @Value("${SPRING_MAIL_PASSWORD}") // आप Render पर यह Env Var उपयोग कर रहे हैं
+    private String sendGridApiKey;
+    
+    // 2. Sender Address को Env Var से प्राप्त करें (यदि आवश्यक हो)
+    @Value("${SPRING_MAIL_USERNAME}")
+    private String senderEmail;
 
-    public void sendMail(String to,String subject,String body){
+    public boolean sendMail(String to, String subject, String body) {
+        
+        // 3. SendGrid ऑब्जेक्ट API Key के साथ बनाएँ
+        SendGrid sendGrid = new SendGrid(sendGridApiKey);
 
-        SimpleMailMessage mailMessage=new SimpleMailMessage();
+        Email from = new Email(senderEmail); // FROM Address
+        Email toEmail = new Email(to);       // TO Address
+        Content content = new Content("text/plain", body);
+        
+        // Dynamic Mail Object बनाएं
+        Mail mail = new Mail(from, subject, toEmail, content);
 
-        mailMessage.setFrom("codeweaver7@gmail.com");
-        mailMessage.setTo(to);
-        mailMessage.setSubject(subject);
-        mailMessage.setText(body);
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            
+            // 4. API कॉल करें
+            Response response = sendGrid.api(request);
 
-        javaMailSender.send(mailMessage);
+            // 5. Success/Error चेक करें
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                System.out.println("Email sent successfully via SendGrid API. Status: " + response.getStatusCode());
+                return true;
+            } else {
+                System.err.println("SendGrid API Error. Status: " + response.getStatusCode() + ", Body: " + response.getBody());
+                return false;
+            }
+        } catch (IOException ex) {
+            System.err.println("API Call Failed: " + ex.getMessage());
+            return false;
+        }
     }
 }
